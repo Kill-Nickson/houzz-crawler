@@ -1,5 +1,4 @@
 import json
-import time
 from pathlib import Path
 from typing import List
 
@@ -39,8 +38,6 @@ class HouzzCrawler:
             try:
                 response = requests.get(detail_pages_url)
                 logger.info(f"Requested {i+1}/{len(all_detail_pages_urls)} detail pages")
-                if i == 120:
-                    time.sleep(30)
             except Exception as e:
                 logger.error(f"Something went wrong while requesting the contractor detail page: {str(e)}")
                 exit()
@@ -60,7 +57,6 @@ class HouzzCrawler:
         try:
             response = requests.get(self.BASE_URL, params={"fi": page_number * self.records_per_page})
             logger.info(f"Requested list page #{page_number+1}")
-            time.sleep(2)
 
         except Exception as e:
             logger.error(f"Something went wrong while requesting the contractor list page: {str(e)}")
@@ -94,7 +90,8 @@ class HouzzCrawler:
         contractors_business_details = {}
 
         soup = BeautifulSoup(page_content, "html.parser")
-        business_details = soup.find("div", {"data-container": "Business Details"})
+        business_section = soup.find("section", {"id": "business"})
+        business_details = business_section.find("div", {"data-container": "Business Details"})
         business_details_blocks = business_details.find_all("div", recursive=False)
 
         for block in business_details_blocks:
